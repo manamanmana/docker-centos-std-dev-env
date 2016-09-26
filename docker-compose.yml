@@ -1,0 +1,42 @@
+version: '2'
+services:
+    app:
+        restart: always
+        build:
+            context: .
+            args:
+                DEV_USER: "${DEV_USER}" # Need to specify with environment variable on up
+        ports: # Any ports you want
+            - "5000:5000"
+            - "8080:8080"
+            - "8888:8888"
+            - "10022:22" # SSH port
+        volumes:
+            - "./${PROJECT_NAME}:/home/${DEV_USER}/${PROJECT_NAME}" # Specify 2 env variables on up
+            - "./goland:/home/${DEV_USER}/goland"
+        links:
+            - mysql
+            - redis
+            - postgres
+            - memcached
+    mysql:
+        restart: always
+        image: mysql
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+    postgres:
+        restart: always
+        image: postgres
+        volumes:
+            - ./data/postgresql:/var/lib/postgresql/data
+    redis:
+        restart: always
+        image: redis
+        volumes:
+            - ./data/redis:/data
+        command: redis-server --appendonly yes
+    memcached:
+        restart: always
+        image: memcached
